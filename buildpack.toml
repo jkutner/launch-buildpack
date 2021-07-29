@@ -2,7 +2,10 @@ api = "0.6"
 
 [buildpack]
   id = "jkutner/launch"
-  version = "1.0.0"
+  version = "1.0.1"
+  homepage = "https://github.com/jkutner/launch-buildpack"
+  description = "Allows you to provide launch configuration to a build."
+  keywords = [ "launch.toml", "slices", "processes", "bom" ]
 
 [[stacks]]
   id = "*"
