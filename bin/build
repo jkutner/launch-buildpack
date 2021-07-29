@@ -7,7 +7,7 @@ CNB_BP_LAYERS_DIR="$1"
 launch_file="${BP_LAUNCH_CONFIG_PATH:-launch.toml}"
 
 if [[ -f "${launch_file}" ]]; then
-  cp "${launch_file}" > ${CNB_BP_LAYERS_DIR}/launch.toml
+  cp "${launch_file}" "${CNB_BP_LAYERS_DIR}/launch.toml"
 fi
 
 exit 0
