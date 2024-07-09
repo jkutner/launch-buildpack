@@ -29,8 +29,9 @@ jobs:
                 set -euo pipefail
                 BP_ID="$(cat buildpack.toml | yj -t | jq -r .buildpack.id)"
                 VERSION="$(cat buildpack.toml | yj -t | jq -r .buildpack.version)"
-                PACKAGE="${REPO}/$(echo "$BP_ID" | sed 's/\//_/g')"
-                BP_FILE="${PACKAGE}_${VERSION}.cnb"
+                BP_ID_SNAKECASE=$(echo "$BP_ID" | sed 's/\//_/g')
+                PACKAGE="${REPO}/$BP_ID_SNAKECASE"
+                BP_FILE="${BP_ID_SNAKECASE}-${VERSION}.cnb"
                 pack buildpack package --publish ${PACKAGE}:${VERSION}
                 pack buildpack package --format file $BP_FILE
                 DIGEST="$(crane digest ${PACKAGE}:${VERSION})"
