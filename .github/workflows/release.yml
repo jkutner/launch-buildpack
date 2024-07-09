@@ -30,14 +30,30 @@ jobs:
                 BP_ID="$(cat buildpack.toml | yj -t | jq -r .buildpack.id)"
                 VERSION="$(cat buildpack.toml | yj -t | jq -r .buildpack.version)"
                 PACKAGE="${REPO}/$(echo "$BP_ID" | sed 's/\//_/g')"
+                BP_FILE="${PACKAGE}_${VERSION}.cnb"
                 pack buildpack package --publish ${PACKAGE}:${VERSION}
+                pack buildpack package --format file $BP_FILE
                 DIGEST="$(crane digest ${PACKAGE}:${VERSION})"
                 echo "bp_id=$BP_ID" >> "$GITHUB_OUTPUT"
                 echo "version=$VERSION" >> "$GITHUB_OUTPUT"
                 echo "address=${PACKAGE}@${DIGEST}" >> "$GITHUB_OUTPUT"
+                echo "file=$BP_FILE" >> "$GITHUB_OUTPUT"
               shell: bash
               env:
                 REPO: ghcr.io/${{ github.repository_owner }}/buildpacks
+            - id: update-release
+              run: |
+                #!/usr/bin/env bash
+                set -euo pipefail
+                curl -X POST \
+                  -H "Authorization: token $GHCR_TOKEN" \
+                  -H "Content-Type: $(file -b --mime-type $BP_FILE)" \
+                  --data-binary @$BP_FILE \
+                  "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${VERSION}/assets?name=${BP_FILE}"
+              env:
+                GHCR_TOKEN:   ${{ secrets.GHCR_TOKEN }}
+                BP_FILE: ${{ steps.package.outputs.file }}
+                VERSION: ${{ steps.package.outputs.version }}
             - id: register
               uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:5.7.3
               with:
